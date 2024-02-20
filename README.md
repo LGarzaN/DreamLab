@@ -1,9 +1,9 @@
 # DreamLab
-Dream lab es un espacio de aprendizaje tecnológico que se planea ignagurar y comenzar a utilizar en 2026. Este es un laboratorio que contará con diversos espacios para fomentar el aprendizaje activo. Dream Lab va dirigido especialmente para alumnos de las carreras de ITC, IRS, ITD e IDM, acá los alumnos podrán afinar sus conocimientos, trabajar proyectos educacionales de las unidades de formación e incluso trabajar en iniciativas personales. Contará con diversos espacios para uso libre de los estudiantes tales como sala de networking, garages para desarrollo de proyectos, laboratorios de redes externas al campus  e incluso espacios para aplicación de pruebas de software.
+Dream Lab is a technological learning space that is planned to be inaugurated and put into use in 2026. This is a laboratory that will have multiple spaces to promote active learning. Dream Lab is specifically focused to be used by students pursuing the following degrees: ITC, IRS, ITD, and IDM. Here, students will be able to refine their knowledge, work on educational projects, and even work on personal initiatives. It will have various spaces for free use, such as a networking room, project development garages, network labs, and even spaces for software testing.
 
-El objetivo de este poryecto es proponer una solución para el registro de reservas de espacios dentro del laboratorio mediante una página web. Enfocándose en el usuario principal, estudiantes del Tecnológico de Monterrey, para simplificar las acciones a realizar y presentando proocesos que sean amigables y llamativos para este grupo de enfoque.  Así, el desarrollo de la página web en conjunto con el uso de herramientas tecnológicas, metodologías de desarrollo de software ágiles y la gestión de proyectos será clave para garantizar la solución de esta problemática.
+The objective of this project is to develop a solution for the reservation of spaces within the laboratory through a website. Focusing on the main user, students at Tecnológico de Monterrey. The aim is to simplify the actions to be taken and processes that are user-friendly and appealing to this target group. Thus, the development of the website, in conjunction with the use of technological tools, agile software development methodologies, and project management, will be key to ensuring the resolution of this issue.
 
-## Equipo
+## Team
 <div align="center">
 <img src="https://forthebadge.com/images/badges/powered-by-coders-sweat.svg" width="250px">
 <table>
@@ -30,9 +30,9 @@ El objetivo de este poryecto es proponer una solución para el registro de reser
   </table>
 </div>
   
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-## Acceso a repositorios
+
+## Acces to repos
 Front
 
 Back
@@ -43,6 +43,9 @@ Back
     <img src="https://img.shields.io/badge/Node%20js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" />
     <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" />
     <img src="https://img.shields.io/badge/Amazon_AWS-FF9900?style=for-the-badge&logo=amazonaws&logoColor=white" />
+
+    
 </p>
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 </div>
 
