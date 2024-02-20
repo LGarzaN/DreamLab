@@ -37,13 +37,12 @@ Front
 
 Back
 
-## Features
+## Coding tools
 <div align="center">
 <p> 
-<img src="svg/dev/frameworks/nodejs_larger.svg" alt="nodejs_larger" style="vertical-align:top; margin:6px 4px">
-<img src="svg/dev/services/aws.svg" alt="aws" style="vertical-align:top; margin:6px 4px">
-<img src="svg/dev/frameworks/react.svg" alt="react" style="vertical-align:top; margin:6px 4px">
-  
+    <img src="https://img.shields.io/badge/Node%20js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" />
+    <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" />
+    <img src="https://img.shields.io/badge/Amazon_AWS-FF9900?style=for-the-badge&logo=amazonaws&logoColor=white" />
 </p>
 </div>
 
