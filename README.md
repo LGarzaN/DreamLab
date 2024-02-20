@@ -1,7 +1,7 @@
 # DreamLab
-Dream Lab is a technological learning space that is planned to be inaugurated and put into use in 2026. This is a laboratory that will have multiple spaces to promote active learning. Dream Lab is specifically focused to be used by students pursuing the following degrees: ITC, IRS, ITD, and IDM. Here, students will be able to refine their knowledge, work on educational projects, and even work on personal initiatives. It will have various spaces for free use, such as a networking room, project development garages, network labs, and even spaces for software testing.
+Dream Lab is a technological learning space that is planned to be inaugurated and put into use in 2026. This laboratory will have multiple spaces to promote active learning. Dream Lab is specifically focused on being used by students pursuing the following degrees: ITC, IRS, ITD, and IDM. Here, students will be able to refine their knowledge, work on educational projects, and even work on personal initiatives. It will have various spaces for free use, such as a networking room, project development garages, network labs, and even spaces for software testing.
 
-The objective of this project is to develop a solution for the reservation of spaces within the laboratory through a website. Focusing on the main user, students at Tecnológico de Monterrey. The aim is to simplify the actions to be taken and processes that are user-friendly and appealing to this target group. Thus, the development of the website, in conjunction with the use of technological tools, agile software development methodologies, and project management, will be key to ensuring the resolution of this issue.
+The goal of this project is to develop a solution for the reservation of spaces within the laboratory through a website. Focusing on the main user, students at Tecnológico de Monterrey. The aim is to simplify the actions to be taken and processes that are user-friendly and appealing to this target group. Thus, the development of the website, in conjunction with the use of technological tools, agile software development methodologies, and project management, will be key to ensuring the resolution of this issue.
 
 ## Team
 <div align="center">
@@ -33,9 +33,9 @@ The objective of this project is to develop a solution for the reservation of sp
 
 
 ## Acces to repos
-Front
+Frontend 
 
-Back
+Backend
 
 ## Coding tools
 <div align="center">
