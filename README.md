@@ -12,7 +12,7 @@ The goal of this project is to develop a solution for the reservation of spaces 
     <tr>
     <th> Ramón Yuri Danzos García </th>
     <th> A00227838 </th>
-    <th> Developer </th>
+    <th> Product owner </th>
   </tr>
     <tr>
     <th> Andrés Marcelo De Luna Pámanes </th>
@@ -49,7 +49,7 @@ Backend
 <p> 
     <img src="https://img.shields.io/badge/Node%20js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" />
     <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" />
-    <img src="https://img.shields.io/badge/Amazon_AWS-FF9900?style=for-the-badge&logo=amazonaws&logoColor=white" />
+   
 
     
 </p>
