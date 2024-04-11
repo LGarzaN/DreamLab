@@ -1,0 +1,137 @@
+-- Crear la base de datos
+CREATE DATABASE IF NOT EXISTS dreamlab;
+USE dreamlab;
+
+CREATE TABLE User (
+    UserId INT PRIMARY KEY AUTO_INCREMENT,
+    Username VARCHAR(15) NOT NULL,
+    Password VARCHAR(50) NOT NULL,
+    Name VARCHAR(50) NOT NULL,
+    Priority INT,
+    ProfilePicture VARCHAR(250)
+);
+
+CREATE TABLE Statistic (
+    StatisticsId INT PRIMARY KEY AUTO_INCREMENT,
+    UserId INT,
+    Reservations INT DEFAULT 0,
+    StudyHours INT DEFAULT 0,
+    ExploredAreas INT DEFAULT 0,
+    FOREIGN KEY (UserId) REFERENCES User (UserId)
+);
+
+CREATE TABLE Zone (
+    ZoneId INT PRIMARY KEY AUTO_INCREMENT,
+    ZoneName VARCHAR(50) NOT NULL,
+    Description VARCHAR(250)
+);
+
+CREATE TABLE Space (
+    SpaceId INT PRIMARY KEY AUTO_INCREMENT,
+    Name VARCHAR(50) NOT NULL,
+    ZoneId INT,
+    Description VARCHAR(250),
+    Requirements VARCHAR(300),
+    Careers VARCHAR(50),
+    Image VARCHAR(250),
+    FOREIGN KEY (ZoneId) REFERENCES Zone (ZoneId)
+);
+
+CREATE TABLE Schedule (
+    ScheduleId INT PRIMARY KEY AUTO_INCREMENT,
+    SpaceId INT,
+    Day DATE,
+    StartHour TIME,
+    EndHour TIME,
+    Occupied BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (SpaceId) REFERENCES Space (SpaceId)
+);
+
+CREATE TABLE Reservation (
+    ReservationId INT PRIMARY KEY AUTO_INCREMENT,
+    UserId INT,
+    SpaceId INT,
+    ScheduleId INT,
+    UserRequirements VARCHAR(250),
+    FOREIGN KEY (UserId) REFERENCES User (UserId),
+    FOREIGN KEY (SpaceId) REFERENCES Space (SpaceId),
+    FOREIGN KEY (ScheduleId) REFERENCES Schedule (ScheduleId)
+);
+
+CREATE TABLE RequirementCatalog (
+    RequirementId INT PRIMARY KEY AUTO_INCREMENT,
+    RequirementName VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE SpaceRequirements (
+    SpaceId INT,
+    RequirementId INT,
+    MaxQuantity INT,
+    FOREIGN KEY (SpaceId) REFERENCES Space(SpaceId),
+    FOREIGN KEY (RequirementId) REFERENCES RequirementCatalog(RequirementId),
+    PRIMARY KEY (SpaceId, RequirementId)
+);
+
+-- Insertar registros en la tabla ZONE
+INSERT INTO Zone (ZoneName, Description) VALUES 
+('Espacios Abiertos', 'Esta zona ofrece un área social de networking, así como una colaborativa para miembros del área de computación.'),
+('Garage Valley', 'Es una zona dirigida para trabajar en proyectos específicos, otorgando herramientas para poder realizar diversas labores tanto de la carrera como proyectos personales.'),
+('Zonas de X-Ploración', 'Esta zona provee áreas destinadas para la innovación y emprendimiento.');
+
+-- Insertar registros en la tabla SPACES
+INSERT INTO Space (Name, ZoneId, Description, Requirements, Careers, Image) VALUES 
+('Social Networking', 1, 'Área de networking para todas las carreras. Acceso libre sin necesidad de reserva. Incluye un video wall interactivo sobre el DREAM Lab.', 'Ninguno', 'Todas', 'img.png'),
+('Lego Room', 1, 'Área colaborativa con herramientas para Windows, Mac y Linux. Solicita hasta 8 mesas de lego para trabajo en equipo.', 'cant_mesas;cant_windows;cant_mac;cant_linux', 'ITC;ITD;IRS;IMD', 'img.png');
+
+-- Insertar registros Garage Valley en la tabla SPACE
+INSERT INTO Space (Name, ZoneId, Description, Requirements, Careers, Image) VALUES 
+('Electric Garage', 2, 'Robotica.', 'Ninguno', 'IRS;ITC', 'img.png'),
+('Dimension Forge', 2, 'Dirigido a todo elemento 3D.', 'cant_impresoras;cant_escaners', 'ITC;IRS;ITD;IMD', 'img.png'),
+('New Horizons', 2, 'Área de realidad virtual, aumentada.', 'cant_oculus;cant_pantallas;cant_windows', 'Todas', 'img.png'),
+('Deep Net', 2, ' Se busca que se hagan pruebas de infraestructura de redes.', 'cant_mesas;cant_windows;cant_mac;cant_linux', 'Todas', 'img.png'),
+('Graveyard', 2, 'Se busca darle un uso al equipo antiguo del Tec, habrá también practicas dirigidas dentro de este.', 'cant_mesas;cant_computadoras', 'Todas', 'img.png'),
+('PCB Factory', 2, 'Va dirigido para circuitos electrónicos.', 'cant_mesas;cant_windows;cant_mac;cant_linux;cant_impresoras', 'IRS;ITC;IDM', 'img.png'),
+('The Matrix', 2, 'Se busca que puedas hacer uso de diversas licencias y software necesario.', 'Ninguno', 'Todas', 'img.png');
+
+-- Insertar registros Zonas de X-ploracion en la tabla SPACE
+INSERT INTO Space (Name, ZoneId, Description, Requirements, Careers, Image) VALUES 
+('Hack battlefield', 3, ' Honeypot para que los alumnos lo ataquen o defiendan. Cuenta con una red segura y aislada de la red del campus.', 'Ninguno', 'IMD;ITC', 'img.png'),
+('Testing land', 3, 'Espacio para realizar pruebas de usabilidad, compatibilidad, UX, UI y de software. Preparado para streaming.', 'Ninguno', 'ITD;ITC', 'img.png'),
+('Web headquarter', 3, ' Salones de juntas para la toma de decisiones de la empresa. ', 'Ninguno', 'ITC;ITD;IRS;IMD;Maestros', 'img.png'),
+(' Biometrics flexible hall', 3, ' Salón flexible para hacer toma de biométricos ', 'Ninguno', 'ITC;ITD;IRS;IMD', 'img.png'),
+('Beyond digits', 3, ' Espacio para visualizar y modelar datos.', 'Ninguno', 'IMD', 'img.png'),
+('Open innovation lab ', 3, ' Espacios para trabajar colaborativamente ', 'Ninguno', 'Maestros', 'img.png');
+
+INSERT INTO RequirementCatalog (RequirementName) VALUES
+('cant_mesas'), 
+('cant_windows'), 
+('cant_mac'), 
+('cant_linux'), 
+('cant_impresoras'), 
+('cant_escaners'), 
+('cant_oculus'), 
+('cant_pantallas'), 
+('cant_computadoras');
+
+-- Lego Room
+INSERT INTO SpaceRequirements (SpaceId, RequirementId, MaxQuantity) VALUES
+(1, 1, 8), -- cant_mesas
+(1, 2, 1), -- cant_windows
+(1, 3, 1), -- cant_mac
+(1, 4, 1); -- cant_linux
+
+-- Electric Garage
+INSERT INTO SpaceRequirements (SpaceId, RequirementId, MaxQuantity) VALUES
+(2, 5, 1), -- cant_impresoras
+(2, 2, 1), -- cant_windows
+(2, 3, 1), -- cant_mac
+(2, 4, 1); -- cant_linux
+
+-- Dimension Forge
+INSERT INTO SpaceRequirements (SpaceId, RequirementId, MaxQuantity) VALUES
+(3, 5, 1), -- cant_impresoras
+(3, 6, 1); -- cant_escaners
+
+-- Insertar usuario administrador en la tabla USER
+INSERT INTO User (Username, Password, Name, Priority, ProfilePicture) 
+VALUES ('root', 'root', 'root', 5, 'img.png');
