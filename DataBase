@@ -1,75 +1,97 @@
--- Crear la base de datos
-CREATE DATABASE IF NOT EXISTS dreamlab;
-USE dreamlab;
-
-CREATE TABLE User (
-    UserId INT PRIMARY KEY AUTO_INCREMENT,
-    Username VARCHAR(15) NOT NULL,
-    Password VARCHAR(50) NOT NULL,
-    Name VARCHAR(50) NOT NULL,
-    Priority INT,
-    ProfilePicture VARCHAR(250)
+CREATE TABLE dbo.[RoleCatalog] (
+    RoleId INT PRIMARY KEY IDENTITY(1,1),
+    RoleName VARCHAR(15) NOT NULL
 );
 
-CREATE TABLE Statistic (
-    StatisticsId INT PRIMARY KEY AUTO_INCREMENT,
+CREATE TABLE dbo.[User] (
+    UserId INT PRIMARY KEY IDENTITY(1,1),
+    Username VARCHAR(15) NOT NULL,
+    Password VARCHAR(70) NOT NULL,
+    Name VARCHAR(50) NOT NULL,
+    RoleId INT,
+    Priority INT,
+    ProfilePicture VARCHAR(250),
+    FOREIGN KEY (RoleId) REFERENCES [RoleCatalog](RoleId)
+);
+
+CREATE TABLE dbo.[Statistic] (
+    StatisticsId INT PRIMARY KEY IDENTITY(1,1),
     UserId INT,
     Reservations INT DEFAULT 0,
     StudyHours INT DEFAULT 0,
     ExploredAreas INT DEFAULT 0,
-    FOREIGN KEY (UserId) REFERENCES User (UserId)
+    FOREIGN KEY (UserId) REFERENCES [User] (UserId)
 );
 
-CREATE TABLE Zone (
-    ZoneId INT PRIMARY KEY AUTO_INCREMENT,
+CREATE TABLE dbo.[Zone] (
+    ZoneId INT PRIMARY KEY IDENTITY(1,1),
     ZoneName VARCHAR(50) NOT NULL,
-    Description VARCHAR(250)
+    Description VARCHAR(250) NOT NULL
 );
 
-CREATE TABLE Space (
-    SpaceId INT PRIMARY KEY AUTO_INCREMENT,
-    Name VARCHAR(50) NOT NULL,
+CREATE TABLE dbo.[Space] (
+    SpaceId INT PRIMARY KEY IDENTITY(1,1),
+    Name VARCHAR(30) NOT NULL,
     ZoneId INT,
-    Description VARCHAR(250),
-    Requirements VARCHAR(300),
-    Careers VARCHAR(50),
+    Description VARCHAR(250) NOT NULL,
     Image VARCHAR(250),
-    FOREIGN KEY (ZoneId) REFERENCES Zone (ZoneId)
+    FOREIGN KEY (ZoneId) REFERENCES [Zone] (ZoneId)
 );
 
-CREATE TABLE Schedule (
-    ScheduleId INT PRIMARY KEY AUTO_INCREMENT,
+CREATE TABLE dbo.[Schedule] (
+    ScheduleId INT PRIMARY KEY IDENTITY(1,1),
     SpaceId INT,
     Day DATE,
     StartHour TIME,
     EndHour TIME,
-    Occupied BOOLEAN DEFAULT FALSE,
-    FOREIGN KEY (SpaceId) REFERENCES Space (SpaceId)
+    Occupied BIT DEFAULT 0,
+    FOREIGN KEY (SpaceId) REFERENCES [Space] (SpaceId)
 );
 
-CREATE TABLE Reservation (
-    ReservationId INT PRIMARY KEY AUTO_INCREMENT,
+CREATE TABLE dbo.[ReservationGroup] (
+    GroupId INT PRIMARY KEY IDENTITY(1,1),
+    GroupCode VARCHAR(8) NOT NULL
+);
+
+CREATE TABLE dbo.[Reservation] (
+    ReservationId INT PRIMARY KEY IDENTITY(1,1),
+    GroupId INT,
     UserId INT,
     SpaceId INT,
     ScheduleId INT,
-    UserRequirements VARCHAR(250),
-    FOREIGN KEY (UserId) REFERENCES User (UserId),
-    FOREIGN KEY (SpaceId) REFERENCES Space (SpaceId),
-    FOREIGN KEY (ScheduleId) REFERENCES Schedule (ScheduleId)
+    UserRequirements VARCHAR(250) NOT NULL,
+    FOREIGN KEY (UserId) REFERENCES [User] (UserId),
+    FOREIGN KEY (SpaceId) REFERENCES [Space] (SpaceId),
+    FOREIGN KEY (ScheduleId) REFERENCES [Schedule] (ScheduleId),
+    FOREIGN KEY (GroupId) REFERENCES [ReservationGroup] (GroupId)
 );
 
-CREATE TABLE RequirementCatalog (
-    RequirementId INT PRIMARY KEY AUTO_INCREMENT,
+CREATE TABLE dbo.[RequirementCatalog] (
+    RequirementId INT PRIMARY KEY IDENTITY(1,1),
     RequirementName VARCHAR(50) NOT NULL
 );
 
-CREATE TABLE SpaceRequirements (
+CREATE TABLE dbo.[SpaceRequirements] (
     SpaceId INT,
     RequirementId INT,
-    MaxQuantity INT,
-    FOREIGN KEY (SpaceId) REFERENCES Space(SpaceId),
-    FOREIGN KEY (RequirementId) REFERENCES RequirementCatalog(RequirementId),
-    PRIMARY KEY (SpaceId, RequirementId)
+    MaxQuantity INT DEFAULT 0,
+    FOREIGN KEY (SpaceId) REFERENCES [Space](SpaceId),
+    FOREIGN KEY (RequirementId) REFERENCES [RequirementCatalog](RequirementId)
+);
+
+CREATE TABLE dbo.[UserRequirements] (
+    GroupId INT,
+    RequirementId INT,
+    Quantity INT DEFAULT 0,
+    FOREIGN KEY (GroupId) REFERENCES [ReservationGroup](GroupId),
+    FOREIGN KEY (RequirementId) REFERENCES [RequirementCatalog](RequirementId)
+);
+
+CREATE TABLE dbo.[SpaceRole] (
+    SpaceId INT,
+    RoleId INT,
+    FOREIGN KEY (SpaceId) REFERENCES [Space](SpaceId),
+    FOREIGN KEY (RoleId) REFERENCES [RoleCatalog](RoleId)
 );
 
 -- Insertar registros en la tabla ZONE
@@ -79,39 +101,44 @@ INSERT INTO Zone (ZoneName, Description) VALUES
 ('Zonas de X-Ploración', 'Esta zona provee áreas destinadas para la innovación y emprendimiento.');
 
 -- Insertar registros en la tabla SPACES
-INSERT INTO Space (Name, ZoneId, Description, Requirements, Careers, Image) VALUES 
-('Social Networking', 1, 'Área de networking para todas las carreras. Acceso libre sin necesidad de reserva. Incluye un video wall interactivo sobre el DREAM Lab.', 'Ninguno', 'Todas', 'img.png'),
-('Lego Room', 1, 'Área colaborativa con herramientas para Windows, Mac y Linux. Solicita hasta 8 mesas de lego para trabajo en equipo.', 'cant_mesas;cant_windows;cant_mac;cant_linux', 'ITC;ITD;IRS;IMD', 'img.png');
+INSERT INTO Space (Name, ZoneId, Description, Image) VALUES 
+('Social Networking', 1, 'Área de networking para todas las carreras. Acceso libre sin necesidad de reserva. Incluye un video wall interactivo sobre el DREAM Lab.', 'img.png'),
+('Lego Room', 1, 'Área colaborativa con herramientas para Windows, Mac y Linux. Solicita hasta 8 mesas de lego para trabajo en equipo.', 'img.png');
 
 -- Insertar registros Garage Valley en la tabla SPACE
-INSERT INTO Space (Name, ZoneId, Description, Requirements, Careers, Image) VALUES 
-('Electric Garage', 2, 'Robotica.', 'Ninguno', 'IRS;ITC', 'img.png'),
-('Dimension Forge', 2, 'Dirigido a todo elemento 3D.', 'cant_impresoras;cant_escaners', 'ITC;IRS;ITD;IMD', 'img.png'),
-('New Horizons', 2, 'Área de realidad virtual, aumentada.', 'cant_oculus;cant_pantallas;cant_windows', 'Todas', 'img.png'),
-('Deep Net', 2, ' Se busca que se hagan pruebas de infraestructura de redes.', 'cant_mesas;cant_windows;cant_mac;cant_linux', 'Todas', 'img.png'),
-('Graveyard', 2, 'Se busca darle un uso al equipo antiguo del Tec, habrá también practicas dirigidas dentro de este.', 'cant_mesas;cant_computadoras', 'Todas', 'img.png'),
-('PCB Factory', 2, 'Va dirigido para circuitos electrónicos.', 'cant_mesas;cant_windows;cant_mac;cant_linux;cant_impresoras', 'IRS;ITC;IDM', 'img.png'),
-('The Matrix', 2, 'Se busca que puedas hacer uso de diversas licencias y software necesario.', 'Ninguno', 'Todas', 'img.png');
+INSERT INTO Space (Name, ZoneId, Description, Image) VALUES 
+('Electric Garage', 2, 'Robotica.', 'img.png'),
+('Dimension Forge', 2, 'Dirigido a todo elemento 3D.',  'img.png'),
+('New Horizons', 2, 'Área de realidad virtual, aumentada.',  'img.png'),
+('Deep Net', 2, ' Se busca que se hagan pruebas de infraestructura de redes.',  'img.png'),
+('Graveyard', 2, 'Se busca darle un uso al equipo antiguo del Tec, habrá también practicas dirigidas dentro de este.', 'img.png'),
+('PCB Factory', 2, 'Va dirigido para circuitos electrónicos.', 'img.png'),
+('The Matrix', 2, 'Se busca que puedas hacer uso de diversas licencias y software necesario.', 'img.png');
 
 -- Insertar registros Zonas de X-ploracion en la tabla SPACE
-INSERT INTO Space (Name, ZoneId, Description, Requirements, Careers, Image) VALUES 
-('Hack battlefield', 3, ' Honeypot para que los alumnos lo ataquen o defiendan. Cuenta con una red segura y aislada de la red del campus.', 'Ninguno', 'IMD;ITC', 'img.png'),
-('Testing land', 3, 'Espacio para realizar pruebas de usabilidad, compatibilidad, UX, UI y de software. Preparado para streaming.', 'Ninguno', 'ITD;ITC', 'img.png'),
-('Web headquarter', 3, ' Salones de juntas para la toma de decisiones de la empresa. ', 'Ninguno', 'ITC;ITD;IRS;IMD;Maestros', 'img.png'),
-(' Biometrics flexible hall', 3, ' Salón flexible para hacer toma de biométricos ', 'Ninguno', 'ITC;ITD;IRS;IMD', 'img.png'),
-('Beyond digits', 3, ' Espacio para visualizar y modelar datos.', 'Ninguno', 'IMD', 'img.png'),
-('Open innovation lab ', 3, ' Espacios para trabajar colaborativamente ', 'Ninguno', 'Maestros', 'img.png');
+INSERT INTO Space (Name, ZoneId, Description, Image) VALUES 
+('Hack battlefield', 3, ' Honeypot para que los alumnos lo ataquen o defiendan. Cuenta con una red segura y aislada de la red del campus.', 'img.png'),
+('Testing land', 3, 'Espacio para realizar pruebas de usabilidad, compatibilidad, UX, UI y de software. Preparado para streaming.', 'img.png'),
+('Web headquarter', 3, ' Salones de juntas para la toma de decisiones de la empresa. ', 'img.png'),
+(' Biometrics flexible hall', 3, ' Salón flexible para hacer toma de biométricos ', 'img.png'),
+('Beyond digits', 3, ' Espacio para visualizar y modelar datos.', 'img.png'),
+('Open innovation lab ', 3, ' Espacios para trabajar colaborativamente ', 'img.png');
 
+-- Llenar la tabla RequirementCatalog con los requerimientos de todas las salas
 INSERT INTO RequirementCatalog (RequirementName) VALUES
-('cant_mesas'), 
-('cant_windows'), 
-('cant_mac'), 
-('cant_linux'), 
-('cant_impresoras'), 
-('cant_escaners'), 
-('cant_oculus'), 
-('cant_pantallas'), 
-('cant_computadoras');
+('cant_mesas'), -- 1
+('cant_windows'), -- 2
+('cant_mac'), -- 3
+('cant_linux'), -- 4
+('cant_impresoras'), -- 5
+('cant_escaners'),  -- 6
+('cant_oculus'), -- 7
+('cant_pantallas'), -- 8
+('cant_computadoras'), -- 9
+('cant_tomHuellas'), -- 10
+('cant_sensorCerebro'), -- 11
+('cant_Ipad'), -- 12
+('cant_Iphone'); -- 13
 
 -- Lego Room
 INSERT INTO SpaceRequirements (SpaceId, RequirementId, MaxQuantity) VALUES
@@ -132,6 +159,157 @@ INSERT INTO SpaceRequirements (SpaceId, RequirementId, MaxQuantity) VALUES
 (3, 5, 1), -- cant_impresoras
 (3, 6, 1); -- cant_escaners
 
+INSERT INTO SpaceRequirements (SpaceId, RequirementId, MaxQuantity) VALUES
+(4, 1, 10), -- cant_mesas
+(4, 5, 5), -- cant_impresoras
+(4, 6, 5); -- cant_escaners
+
+INSERT INTO SpaceRequirements (SpaceId, RequirementId, MaxQuantity) VALUES
+(5, 1, 8), -- cant_mesas
+(5, 2, 4), -- cant_windows
+(5, 3, 4), -- cant_mac
+(5, 7, 6); -- cant_linux
+
+INSERT INTO SpaceRequirements (SpaceId, RequirementId, MaxQuantity) VALUES
+(6, 1, 8), -- cant_mesas
+(6, 2, 5), -- cant_windows
+(6, 3, 5), -- cant_mac
+(6, 4, 5); -- cant_linux
+
+INSERT INTO SpaceRequirements (SpaceId, RequirementId, MaxQuantity) VALUES
+(7, 1, 15), -- cant_mesas
+(7, 2, 20), -- cant_computadoras
+(7, 8, 8); -- cant_pantallas
+
+INSERT INTO SpaceRequirements (SpaceId, RequirementId, MaxQuantity) VALUES
+(8, 1, 12), -- cant_mesas
+(8, 2, 5), -- cant_windows
+(8, 3, 5), -- cant_mac
+(8, 4, 3); -- cant_linux
+
+INSERT INTO SpaceRequirements (SpaceId, RequirementId, MaxQuantity) VALUES
+(9, 1, 20), -- cant_mesas
+(9, 2, 7), -- cant_windows
+(9, 3, 5), -- cant_mac
+(9, 4, 5); -- cant_linux
+
+INSERT INTO SpaceRequirements (SpaceId, RequirementId, MaxQuantity) VALUES
+(11, 12, 15), -- cant_Ipad
+(11, 13, 15), -- cant_Iphone
+(13, 10, 4), -- cant_tomHuellas
+(13, 11, 2); -- cant_sensorCerebro
+
+-- Llenar la tabla RolCatalog con los nombres de las carreras
+INSERT INTO RoleCatalog (RoleName) VALUES 
+('ITC'), -- 1
+('ITD'), -- 2
+('IRS'), -- 3
+('IDM'), -- 4
+('Maestro'), -- 5
+('Socio Formador'), -- 6
+('Admin'), -- 7
+('Libre'); -- 8
+
+-- Llenar la tabla SpaceRol con las carreras por espacio
+INSERT INTO SpaceRole (SpaceId, RoleId) VALUES 
+('1', '8'), 
+('2', '1'), 
+('2', '2'), 
+('2', '3'), 
+('2', '4'), 
+('2', '5'), 
+('2', '6'), 
+('2', '7'),
+('3', '1'), 
+('3', '3'), 
+('3', '7'),
+('4', '1'), 
+('4', '2'), 
+('4', '3'), 
+('4', '4'), 
+('4', '5'), 
+('4', '6'),
+('4', '7'),
+('5', '6'), 
+('5', '1'), 
+('5', '2'), 
+('5', '3'), 
+('5', '4'), 
+('5', '5'), 
+('5', '6'), 
+('5', '7'),
+('6', '1'), 
+('6', '2'), 
+('6', '3'), 
+('6', '4'), 
+('6', '5'), 
+('6', '6'), 
+('6', '7'),
+('7', '1'), 
+('7', '2'), 
+('7', '3'), 
+('7', '4'), 
+('7', '5'), 
+('7', '6'), 
+('7', '7'),
+('8', '1'), 
+('8', '2'), 
+('8', '3'), 
+('8', '4'), 
+('8', '5'), 
+('8', '6'), 
+('8', '7'),
+('9', '1'), 
+('9', '2'), 
+('9', '3'), 
+('9', '4'), 
+('9', '5'), 
+('9', '6'), 
+('9', '7'),
+('10', '1'), 
+('10', '2'), 
+('10', '3'), 
+('10', '4'), 
+('10', '5'), 
+('10', '6'),
+('10', '7'),
+('11', '1'), 
+('11', '2'), 
+('11', '3'), 
+('11', '4'), 
+('11', '5'), 
+('11', '6'), 
+('11', '7'),
+('12', '1'), 
+('12', '2'), 
+('12', '3'), 
+('12', '4'), 
+('12', '5'), 
+('12', '6'), 
+('12', '7'),
+('13', '1'), 
+('13', '2'), 
+('13', '3'), 
+('13', '4'), 
+('13', '5'), 
+('13', '6'), 
+('13', '7'),
+('14', '1'), 
+('14', '2'), 
+('14', '3'), 
+('14', '4'), 
+('14', '5'), 
+('14', '6'), 
+('14', '7'),
+('15', '1'), 
+('15', '2'), 
+('15', '3'), 
+('15', '4'), 
+('15', '5'), 
+('15', '6'), 
+('15', '7');
+
+
 -- Insertar usuario administrador en la tabla USER
-INSERT INTO User (Username, Password, Name, Priority, ProfilePicture) 
-VALUES ('root', 'root', 'root', 5, 'img.png');
+INSERT INTO [User] (Username, Password, Name, RoleId, Priority, ProfilePicture) VALUES
+('root', 'root', 'root', 7, 5, 'img.png');
