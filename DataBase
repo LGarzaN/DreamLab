@@ -48,6 +48,16 @@ CREATE TABLE dbo.[Schedule] (
     FOREIGN KEY (SpaceId) REFERENCES [Space] (SpaceId)
 );
 
+CREATE TABLE dbo.[ScheduleHistory] (
+    ScheduleId INT PRIMARY KEY IDENTITY(1,1),
+    SpaceId INT,
+    Day DATE,
+    StartHour TIME,
+    EndHour TIME,
+    Occupied BIT DEFAULT 0,
+    FOREIGN KEY (SpaceId) REFERENCES [Space] (SpaceId)
+);
+
 CREATE TABLE dbo.[ReservationGroup] (
     GroupId INT PRIMARY KEY IDENTITY(1,1),
     GroupCode VARCHAR(8) NOT NULL
@@ -63,6 +73,19 @@ CREATE TABLE dbo.[Reservation] (
     FOREIGN KEY (UserId) REFERENCES [User] (UserId),
     FOREIGN KEY (SpaceId) REFERENCES [Space] (SpaceId),
     FOREIGN KEY (ScheduleId) REFERENCES [Schedule] (ScheduleId),
+    FOREIGN KEY (GroupId) REFERENCES [ReservationGroup] (GroupId)
+);
+
+CREATE TABLE dbo.[ReservationHistory] (
+    ReservationId INT PRIMARY KEY IDENTITY(1,1),
+    GroupId INT,
+    UserId INT,
+    SpaceId INT,
+    ScheduleId INT,
+    UserRequirements VARCHAR(250) NOT NULL,
+    FOREIGN KEY (UserId) REFERENCES [User] (UserId),
+    FOREIGN KEY (SpaceId) REFERENCES [Space] (SpaceId),
+    FOREIGN KEY (ScheduleId) REFERENCES [ScheduleHistory] (ScheduleId),
     FOREIGN KEY (GroupId) REFERENCES [ReservationGroup] (GroupId)
 );
 
@@ -94,8 +117,127 @@ CREATE TABLE dbo.[SpaceRole] (
     FOREIGN KEY (RoleId) REFERENCES [RoleCatalog](RoleId)
 );
 
+
+-- Stored Procedures
+
+CREATE PROCEDURE [dbo].[CancelReservation]
+    @groupCode varchar(10),
+    @userId INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+	-- Declare Variables
+	DECLARE @groupId INT;
+	DECLARE @scheduleId INT;
+
+	-- Get GroupId via GroupCode
+	SELECT @groupId = GroupId
+	FROM ReservationGroup
+	WHERE GroupCode = @groupCode;
+
+	-- Get ScheduleId via GroupId
+	SELECT @scheduleId = ScheduleId
+	FROM Reservation
+	WHERE GroupId = @groupId
+
+    -- Delete records from UserRequirements table
+    DELETE FROM UserRequirements WHERE GroupId = @groupId;
+
+    -- Update Statistic table
+    UPDATE Statistic
+    SET Reservations = Reservations - 1,
+        StudyHours = StudyHours - 1
+    WHERE UserId = @userId;
+
+    -- Update Schedule table
+    UPDATE [dbo].[Schedule]
+    SET Occupied = 0
+    WHERE ScheduleId = @scheduleId;
+
+    -- Delete records from Reservation table
+    DELETE FROM Reservation WHERE GroupId = @groupId;
+
+    -- Delete records from ReservationGroup table
+    DELETE FROM ReservationGroup WHERE GroupId = @groupId;
+END
+
+CREATE PROCEDURE [dbo].[GetReservationDetails]
+    @UserId INT
+AS
+BEGIN
+	SELECT 
+		S.[day] AS [day],
+		S.StartHour,
+		S.EndHour,
+		SP.name AS SpaceName,
+		R.SpaceId,
+		STRING_AGG(CONVERT(VARCHAR(10), UR.RequirementId), ',') AS RequirementIds,
+		STRING_AGG(CONVERT(VARCHAR(10), UR.Quantity), ',') AS Quantities,
+		RG.GroupCode
+	FROM 
+		RESERVATION R
+	JOIN 
+		SCHEDULE S ON R.ScheduleId = S.ScheduleId
+	JOIN 
+		[SPACE] SP ON R.SpaceId = SP.SpaceId
+	JOIN
+		[UserRequirements] UR ON UR.GroupId = R.GroupId
+	JOIN
+		[ReservationGroup] RG ON RG.GroupId = R.GroupId
+
+	WHERE 
+		R.UserId = @UserId and S.Day >= CONVERT(DATE, GETDATE() AT TIME ZONE 'Central Standard Time (Mexico)')
+	GROUP BY
+		S.[day],
+		S.StartHour,
+		S.EndHour,
+		SP.name,
+		R.SpaceId,
+		RG.GroupCode
+	ORDER BY 
+		S.[day] ASC;
+END
+
+CREATE PROCEDURE [dbo].[GetSchedule]
+    @p_SpaceId INT
+AS
+BEGIN
+    SELECT ScheduleId, Day, StartHour, EndHour 
+    FROM [dbo].[Schedule] 
+    WHERE SpaceId = @p_SpaceId AND Occupied = 0;
+END
+
+CREATE PROCEDURE [dbo].[GetSpaceRequirements]
+    @SpaceId INT
+AS
+BEGIN
+    
+	SELECT
+		sr.SpaceId,
+		sr.RequirementId,
+		rc.RequirementName,
+		sr.MaxQuantity
+	FROM
+		dbo.[SpaceRequirements] sr
+	INNER JOIN
+		dbo.[RequirementCatalog] rc ON sr.RequirementId = rc.RequirementId
+	WHERE
+		sr.SpaceId = @SpaceId;
+END
+
+CREATE PROCEDURE [dbo].[SearchUser]
+    @p_Username VARCHAR(15)
+AS
+BEGIN
+    SELECT * FROM [User] WHERE Username = @p_Username;
+END
+
+
+-- INSERTS
+
 -- Insertar registros en la tabla ZONE
-INSERT INTO Zone (ZoneName, Description) VALUES 
+INSERT INTO Zone (ZoneName, Description) VALUES
 ('Espacios Abiertos', 'Esta zona ofrece un área social de networking, así como una colaborativa para miembros del área de computación.'),
 ('Garage Valley', 'Es una zona dirigida para trabajar en proyectos específicos, otorgando herramientas para poder realizar diversas labores tanto de la carrera como proyectos personales.'),
 ('Zonas de X-Ploración', 'Esta zona provee áreas destinadas para la innovación y emprendimiento.');
@@ -143,21 +285,21 @@ INSERT INTO RequirementCatalog (RequirementName) VALUES
 -- Lego Room
 INSERT INTO SpaceRequirements (SpaceId, RequirementId, MaxQuantity) VALUES
 (1, 1, 8), -- cant_mesas
-(1, 2, 1), -- cant_windows
-(1, 3, 1), -- cant_mac
-(1, 4, 1); -- cant_linux
+(1, 2, 4), -- cant_windows
+(1, 3, 4), -- cant_mac
+(1, 4, 4); -- cant_linux
 
 -- Electric Garage
 INSERT INTO SpaceRequirements (SpaceId, RequirementId, MaxQuantity) VALUES
-(2, 5, 1), -- cant_impresoras
-(2, 2, 1), -- cant_windows
-(2, 3, 1), -- cant_mac
-(2, 4, 1); -- cant_linux
+(2, 5, 3), -- cant_impresoras
+(2, 2, 4), -- cant_windows
+(2, 3, 4), -- cant_mac
+(2, 4, 4); -- cant_linux
 
 -- Dimension Forge
 INSERT INTO SpaceRequirements (SpaceId, RequirementId, MaxQuantity) VALUES
-(3, 5, 1), -- cant_impresoras
-(3, 6, 1); -- cant_escaners
+(3, 5, 3), -- cant_impresoras
+(3, 6, 2); -- cant_escaners
 
 INSERT INTO SpaceRequirements (SpaceId, RequirementId, MaxQuantity) VALUES
 (4, 1, 10), -- cant_mesas
